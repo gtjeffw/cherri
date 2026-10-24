@@ -16,6 +16,8 @@ enum contactDetail {
  'Company',
  'Job Title',
  'Department',
+ 'Email Addresses',
+ 'Phone Numbers',
  'File Extension',
  'Creation Date',
  'File Path',
