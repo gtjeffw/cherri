@@ -94,10 +94,7 @@ func generateActions() {
 			if actions[tokenAction.ident] == nil {
 				exit(fmt.Sprintf("Undefined action '%s'", tokenAction.ident))
 			}
-			setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
-			if tokenAction.ident == "rawAction" && len(tokenAction.args) > 0 {
-				currentAction.definition.overrideIdentifier = getArgValue(tokenAction.args[0]).(string)
-			}
+			setCurrentTokenAction(tokenAction)
 			makeAction(tokenAction.args, &WFActionReference{})
 		case Repeat:
 			makeRepeatAction(&t)
@@ -110,6 +107,15 @@ func generateActions() {
 		case Conditional:
 			makeConditionalAction(&t)
 		}
+	}
+}
+
+// setCurrentTokenAction sets the current action from an action token, applying the identifier
+// given to rawAction() whether it is a standalone statement or assigned to a variable.
+func setCurrentTokenAction(tokenAction action) {
+	setCurrentAction(tokenAction.ident, actions[tokenAction.ident])
+	if tokenAction.ident == "rawAction" && len(tokenAction.args) > 0 {
+		currentAction.definition.overrideIdentifier = getArgValue(tokenAction.args[0]).(string)
 	}
 }
 
@@ -206,9 +212,8 @@ func makeVariableValue(reference *WFActionReference, valueType tokenType, value 
 		makeExpressionValue(reference, value)
 	case Action:
 		var valuePtr = *value
-		var action = valuePtr.(action)
-		setCurrentAction(action.ident, actions[action.ident])
-		makeAction(action.args, reference)
+		setCurrentTokenAction(valuePtr.(action))
+		makeAction(valuePtr.(action).args, reference)
 	case Dict:
 		addStdAction("dictionary", attachReferenceToParams(map[string]any{
 			"WFItems": makeDictionaryValue(value),
