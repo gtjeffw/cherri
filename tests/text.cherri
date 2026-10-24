@@ -49,4 +49,19 @@ if allCapitalized != "Hello World" {
     mustOutput("❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'", "❌ FAIL: capitalizeAll — got {allCapitalized}, expected 'Hello World'")
 }
 
+// getRichTextFromHTML / getRichTextFromMarkdown (input passed as a variable)
+const html = "<p>Hello <b>world</b></p>"
+const richFromHTML = getRichTextFromHTML(html)
+const htmlMarkdown = makeMarkdown(richFromHTML)
+if htmlMarkdown !contains "Hello" {
+    mustOutput("❌ FAIL: getRichTextFromHTML — got {htmlMarkdown}, expected it to contain 'Hello'", "❌ FAIL: getRichTextFromHTML — got {htmlMarkdown}, expected it to contain 'Hello'")
+}
+
+const markdown = "Hello **world**"
+const richFromMarkdown = getRichTextFromMarkdown(markdown)
+const markdownHTML = makeHTML(richFromMarkdown)
+if markdownHTML !contains "Hello" {
+    mustOutput("❌ FAIL: getRichTextFromMarkdown — got {markdownHTML}, expected it to contain 'Hello'", "❌ FAIL: getRichTextFromMarkdown — got {markdownHTML}, expected it to contain 'Hello'")
+}
+
 show("✅ All tests passed")

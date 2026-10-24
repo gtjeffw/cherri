@@ -6,13 +6,13 @@ Text Editing Actions
 action 'gethtmlfromrichtext' makeHTML(text input: 'WFInput', bool ?makeFullDocument: 'WFMakeFullDocument' = false): text
 
 // [Doc]: [Rich Text] Make Rich Text from HTML
-action getRichTextFromHTML(text html: 'WFHTML'): text
+action getRichTextFromHTML(variable html: 'WFHTML'): text
 
 // [Doc]: [Rich Text] Make Markdown: Make Markdown from Rich Text.
 action 'getmarkdownfromrichtext' makeMarkdown(text richText: 'WFInput'): text
 
 // [Doc]: [Rich Text] Get Rich Text from Markdown
-action getRichTextFromMarkdown(text markdown: 'WFInput'): text
+action getRichTextFromMarkdown(variable markdown: 'WFInput'): text
 
 enum stopListeningTrigger {
 	'After Pause',
