@@ -1,0 +1,7 @@
+// compile-only: selecting a contact is interactive, not behaviorally assertable
+
+const contact = selectContact()
+const emails = getContactDetail(contact, "Email Addresses")
+const phones = getContactDetail(contact, "Phone Numbers")
+
+show("✅ All tests passed")
