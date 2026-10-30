@@ -237,6 +237,34 @@ var actions = map[string]*actionDefinition{
 			"operation": "Toggle",
 		},
 	},
+	"findContacts": {
+		doc: selfDoc{
+			title:       "Find Contacts",
+			description: "Find contacts matching all or any of the given conditions, each a property, an operator and a value.",
+			category:    "contacts",
+		},
+		identifier: "filter.contacts",
+		parameters: []parameterDefinition{
+			{
+				name:      "match",
+				validType: String,
+				enum:      "filterMatch",
+			},
+			{
+				name:      "conditions",
+				validType: String,
+				infinite:  true,
+			},
+		},
+		check: func(args []actionArgument, _ *actionDefinition) {
+			checkContentFilter(args[1:], contactFilterProperties)
+		},
+		makeParams: func(args []actionArgument) map[string]any {
+			return map[string]any{
+				"WFContentItemFilter": makeContentFilter(getArgValue(args[0]).(string), args[1:]),
+			}
+		},
+	},
 	"emailAddress": {
 		doc: selfDoc{
 			title:       "Email Address",
@@ -2207,4 +2235,78 @@ func decompInfiniteURLAction(action *ShortcutAction) (arguments []string) {
 	}
 
 	return
+}
+
+var contactFilterProperties = []string{
+	"Name", "First Name", "Middle Name", "Last Name", "Prefix", "Suffix", "Nickname",
+	"Phonetic First Name", "Phonetic Middle Name", "Phonetic Last Name",
+	"Company", "Job Title", "Department", "Email Addresses", "Phone Numbers",
+}
+
+var filterValueKeys = map[string]string{
+	"Email Addresses": "Email",
+	"Phone Numbers":   "Phone",
+}
+
+var filterOperators = map[string]int{
+	"is":               4,
+	"is not":           5,
+	"contains":         99,
+	"does not contain": 999,
+	"begins with":      8,
+	"ends with":        9,
+}
+
+func checkContentFilter(conditions []actionArgument, properties []string) {
+	if len(conditions) == 0 || len(conditions)%3 != 0 {
+		parserError("Conditions must be given in groups of three: a property, an operator and a value.")
+	}
+	for i := 0; i < len(conditions); i += 3 {
+		for _, literal := range conditions[i : i+2] {
+			if literal.valueType != String || strings.ContainsAny(literal.value.(string), "{}") {
+				parserError("A condition's property and operator must be literal text.")
+			}
+		}
+		var property = conditions[i].value.(string)
+		if !slices.Contains(properties, property) {
+			parserError(fmt.Sprintf("Unsupported filter property '%s'. Expected one of: %s.", property, strings.Join(properties, ", ")))
+		}
+		var operator = conditions[i+1].value.(string)
+		if _, found := filterOperators[operator]; !found {
+			parserError(fmt.Sprintf("Unknown filter operator '%s'. Expected one of: is, is not, contains, does not contain, begins with, ends with.", operator))
+		}
+	}
+}
+
+func makeContentFilter(match string, conditions []actionArgument) map[string]any {
+	var prefix = 0
+	if match == "all" {
+		prefix = 1
+	}
+	var templates = make([]map[string]any, 0, len(conditions)/3)
+	for i := 0; i < len(conditions); i += 3 {
+		var property = conditions[i].value.(string)
+		var valueKey, found = filterValueKeys[property]
+		if !found {
+			valueKey = "String"
+		}
+		templates = append(templates, map[string]any{
+			"Property":  property,
+			"Operator":  filterOperators[conditions[i+1].value.(string)],
+			"Removable": true,
+			"Values": map[string]any{
+				valueKey: paramValue(conditions[i+2], String),
+				"Unit":   4,
+			},
+		})
+	}
+
+	return map[string]any{
+		"Value": map[string]any{
+			"WFActionParameterFilterPrefix":    prefix,
+			"WFActionParameterFilterTemplates": templates,
+			"WFContentPredicateBoundedDate":    false,
+		},
+		"WFSerializationType": "WFContentPredicateTableTemplate",
+	}
 }

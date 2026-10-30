@@ -104,6 +104,7 @@ var enumerations = map[string][]string{
 	"inputType":                     {"Text", "Number", "URL", "Date", "Time", "Date and Time"},
 	"appSplitRatio":                 {"half", "thirdByTwo"},
 	"sortOrder":                     {"asc", "desc"},
+	"filterMatch":                   {"all", "any"},
 	"windowSorting":                 {"Title", "App Name", "Width", "Height", "X Position", "Y Position", "Window Index", "Name", "Random"},
 	"fileLabel":                     {"red", "orange", "yellow", "green", "blue", "purple", "gray"},
 	"filesSortBy":                   {"File Size", "File Extension", "Creation Date", "File Path", "Last Modified Date", "Name", "Random"},
