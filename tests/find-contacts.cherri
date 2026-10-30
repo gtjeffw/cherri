@@ -1,0 +1,8 @@
+// compile-only: results depend on the contacts on the device
+
+const lastName = "Appleseed"
+const named = findContacts("all", "First Name", "is", "John", "Last Name", "is", "{lastName}")
+const either = findContacts("any", "Company", "contains", "Apple", "Email Addresses", "is", "john@example.com")
+const others = findContacts("all", "Name", "is not", "John Appleseed", "Job Title", "does not contain", "Engineer", "Nickname", "begins with", "J", "Phone Numbers", "ends with", "0100")
+
+show("✅ All tests passed")
